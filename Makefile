@@ -3,7 +3,7 @@ CCFLAGS = -Wall -Wextra -pthread -std=c++17 # flags
 TARGET = ex4.out # output file after build
 
 # This is my source files:
-SRCS = main.cpp BoundedBuffer.cpp Producer.cpp Dispatcher.cpp Co_Editor.cpp Screen_Manager.cpp
+SRCS = main.cpp BoundedBuffer.cpp Producer.cpp Dispatcher.cpp CoEditor.cpp ScrManager.cpp
 # object files
 OBJS = $(SRCS:.cpp=.o)
 

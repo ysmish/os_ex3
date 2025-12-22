@@ -1,4 +1,4 @@
-#include "Co_Editor.h"
+#include "CoEditor.h"
 
 // co-editors queue and screen manager queue
 Co_Editor::Co_Editor(BoundedBuffer& coeq, BoundedBuffer& smq) : coeq(coeq), smq(smq) {}

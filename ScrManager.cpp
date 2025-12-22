@@ -1,4 +1,4 @@
-#include "Screen_Manager.h"
+#include "ScrManager.h"
 // co-editors queue and screen manager queue
 Screen_Manager::Screen_Manager(BoundedBuffer& smq) : smq(smq) {}
 void Screen_Manager::display() {

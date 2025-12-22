@@ -1,9 +1,9 @@
 #include "ex4.h"
 #include "BoundedBuffer.h"
 #include "Dispatcher.h"
-#include "Co_Editor.h"
+#include "CoEditor.h"
 #include "Producer.h"
-#include "Screen_Manager.h"
+#include "ScrManager.h"
 
 vector<int*> parse_config(char *name) {
     vector<int*> ret;
