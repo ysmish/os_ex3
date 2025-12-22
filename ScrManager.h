@@ -1,6 +1,6 @@
 #ifndef SCRMEN_H
 #define SCRMEN_H
-#include "ex4.h"
+#include "ex3.h"
 #include "BoundedBuffer.h"
 #define DONE_STR "DONE"
 

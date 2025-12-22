@@ -1,6 +1,6 @@
 CC = g++ # compiler
 CCFLAGS = -Wall -Wextra -pthread -std=c++17 # flags
-TARGET = ex4.out # output file after build
+TARGET = ex3.out # output file after build
 
 # This is my source files:
 SRCS = main.cpp BoundedBuffer.cpp Producer.cpp Dispatcher.cpp CoEditor.cpp ScrManager.cpp

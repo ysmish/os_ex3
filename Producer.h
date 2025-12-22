@@ -1,6 +1,6 @@
 #ifndef PROD_H
 #define PROD_H
-#include "ex4.h"
+#include "ex3.h"
 #include "BoundedBuffer.h"
 
 const string produce_names[NEWS_TYPES] = {"SPORTS", "NEWS", "WEATHER"};

@@ -1,5 +1,5 @@
-#ifndef EX4_H
-#define EX4_H
+#ifndef EX3_H
+#define EX3_H
 
 #include <sys/stat.h>
 #include <unistd.h>
