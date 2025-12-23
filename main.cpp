@@ -8,10 +8,10 @@
 vector<int*> parse_config(char *name) {
     vector<int*> ret;
     // each value in the vector three ints.
-    // the first one being the id of the producer
-    // the second one being the number of products
-    // the third one being the queue size of the producer
-    // the last pair in the vector represent the co editors.
+    // the first one being the id of the producer.
+    // the second one being the number of products.
+    // the third one being the queue size of the producer.
+    // the last pair in the vector represents the co editors.
     FILE* file = fopen(name, "r");
     int id;
     int n;
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
     }
     pthread_create(&pt, nullptr, handle_screen_manager, (void *)&sm);
     threads.push_back(pt);
-    // important to wait before cleaning
+    // wait before cleaning
     void *ignore;
     for (pthread_t x : threads) {
         pthread_join(x, &ignore);

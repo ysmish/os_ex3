@@ -45,9 +45,9 @@ int BoundedBuffer::consume(news_data *dst) {
     struct sembuf sops[1];
     sops[0].sem_num = FULL;
     sops[0].sem_flg = flags;
-    sops[0].sem_op = -1; // consume one - one less filled
+    sops[0].sem_op = -1; // consume one, one less filled
     if (semop(semid, sops, 1) == -1) {
-        // the buffer is empty
+        // buffer is empty
         return -1;
     }
     pthread_mutex_lock(&lock);
@@ -56,13 +56,13 @@ int BoundedBuffer::consume(news_data *dst) {
     pthread_mutex_unlock(&lock);
     sops[0].sem_num = EMPTY;
     sops[0].sem_flg = flags;
-    sops[0].sem_op = 1; // consume one - one more empty
+    sops[0].sem_op = 1; // consume one, one more empty
     semop(semid, sops, 1);
     return 0;
 }
 
 BoundedBuffer::~BoundedBuffer() {
-    // delete the mutex and the semaphore.
+    // delete the mutex and the semaphore
     pthread_mutex_destroy(&lock);
     if (semctl(semid, 0, IPC_RMID, NULL) == -1) {
         printf("semaphore delete error\n");

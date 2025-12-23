@@ -2,7 +2,7 @@
 // co-editors queue and screen manager queue
 Screen_Manager::Screen_Manager(BoundedBuffer& smq) : smq(smq) {}
 void Screen_Manager::display() {
-    int n_done = 0; // counts the number of DONE
+    int n_done = 0; // counts the number of DONEs
     news_data nd;       
     while (n_done < 3) {
         smq.consume(&nd);
