@@ -7,15 +7,11 @@
 
 vector<int*> parse_config(char *name) {
     vector<int*> ret;
-    // each value in the vector three ints.
-    // the first one being the id of the producer.
-    // the second one being the number of products.
-    // the third one being the queue size of the producer.
     // the last pair in the vector represents the co editors.
     FILE* file = fopen(name, "r");
-    int id;
-    int n;
-    int size;
+    int id;  //id of the producer.
+    int n;  //number of products to produce.
+    int size; //queue size of the producer.
     while (true) {
         int a = fscanf(file, "PRODUCER %d\n", &id);
         int b = fscanf(file, "%d\n", &n);
@@ -40,7 +36,6 @@ vector<int*> parse_config(char *name) {
 }
 // returns an array of pointers to producers
 vector<Producer*> init_producers(vector<int*> vec, vector<BoundedBuffer*> *pq) {
-    // dynamic array of pointers to producers
     vector<Producer*> ret;
     for (long unsigned int i = 0; i < vec.size(); i++) {
         int *c = vec[i];
@@ -94,7 +89,7 @@ int main(int argc, char *argv[]) {
     vector<BoundedBuffer*> pq;
     vector<BoundedBuffer*> co;
     vector<Producer*> producers = init_producers(vec, &pq);
-    BoundedBuffer smbb(100); // screen manager queue size =
+    BoundedBuffer smbb(100); // screen manager queue size =100
     vector<Co_Editor*> co_editors = init_co_editors(co_editor_size, &smbb, &co);
     ScrManager sm(smbb);
     Dispatcher d(pq, co);
