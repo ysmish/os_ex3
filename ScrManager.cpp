@@ -1,16 +1,17 @@
 #include "ScrManager.h"
 // co-editors queue and screen manager queue
-Screen_Manager::Screen_Manager(BoundedBuffer& smq) : smq(smq) {}
-void Screen_Manager::display() {
-    int n_done = 0; // counts the number of DONEs
+ScrManager::ScrManager(BoundedBuffer& smq) : smq(smq) {}
+void ScrManager::display() {
     news_data nd;       
-    while (n_done < 3) {
+    int num_of_dones = 0; // counts the number of DONEs
+    while (num_of_dones < 3) {
         smq.consume(&nd);
-        if (nd.type != DONE) {
-            cout << nd.str << endl;
-        } else {
-            n_done ++;
+        if(nd.type == DONE) {
+            num_of_dones++;
+        }
+        else {
+            cout << nd.str << endl; 
         }
     }
-    cout << DONE_STR << endl;
+    cout << "DONE" << endl;
 }

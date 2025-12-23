@@ -1,15 +1,21 @@
 #include "CoEditor.h"
 
-// co-editors queue and screen manager queue
-Co_Editor::Co_Editor(BoundedBuffer& coeq, BoundedBuffer& smq) : coeq(coeq), smq(smq) {}
+Co_Editor::Co_Editor(BoundedBuffer& coeq, BoundedBuffer& smq) : coeq(coeq), smq(smq) {} // co-editors queue and screen manager queue
+
 void Co_Editor::edit() {
     news_data nd;
-    do {
-        coeq.consume(&nd);
-        if (nd.type != DONE) {
-            // sleeps 100000 microseconds which is 0.1 seconds
-            usleep(100000);
+    while (true) {
+        if (coeq.consume(&nd) == -1) { // non-blocking: nothing to consume
+            usleep(50000);
+            continue;
         }
+
+        if (nd.type != DONE) {
+            usleep(100000); // simulate editing work
+        }
+
         smq.produce(nd);
-    } while (nd.type != DONE);
+
+        if (nd.type == DONE) break;
+    }
 }

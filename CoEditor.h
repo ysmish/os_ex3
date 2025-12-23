@@ -2,11 +2,9 @@
 #define COE_H
 #include "ex3.h"
 #include "BoundedBuffer.h"
-
 class Co_Editor {
 public:
-    // co-editors queue and screen manager queue
-    Co_Editor(BoundedBuffer& coeq, BoundedBuffer& smq);
+    Co_Editor(BoundedBuffer& coeq, BoundedBuffer& smq);    // co-editors queue and screen manager queue
     void edit();
 private:
     BoundedBuffer& coeq;

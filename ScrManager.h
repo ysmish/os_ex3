@@ -2,12 +2,10 @@
 #define SCRMEN_H
 #include "ex3.h"
 #include "BoundedBuffer.h"
-#define DONE_STR "DONE"
 
-class Screen_Manager {
+class ScrManager {
 public:
-    // co-editors queue and screen manager queue
-    Screen_Manager(BoundedBuffer& smq);
+    ScrManager(BoundedBuffer& smq);    // co-editors queue and screen manager queue
     void display();
 private:
     BoundedBuffer& smq;

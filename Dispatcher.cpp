@@ -1,41 +1,36 @@
 #include "Dispatcher.h"
-// producer queues and co-editors queues
 Dispatcher::Dispatcher(vector<BoundedBuffer*> pq, vector<BoundedBuffer*> coeq) {
-    this->pq = pq;
+    this->pq = pq; // producer queues and co-editors queues
     this->coeq = coeq;
 }
-// takes from the producers to the matching queue of the co editors
 void Dispatcher::redirect() {
-    int len = pq.size();
-    int n_working_queues = len; // number of working queues
-    bool working_queues[len] = {false};
-    int i = 0;
+    size_t len = pq.size();   
+    vector<bool> working_queues(len, false);
+    size_t num_working_queues = len;
+    size_t idx = 0;
     news_data nd;
-    while (n_working_queues) {
-        if ((*pq[i]).consume(&nd) == -1) {
-            i = (i + 1) % len;
+    while (num_working_queues > 0) {   //until all report DONE
+        if (pq[idx]->consume(&nd) == -1) {
+            idx = (idx + 1) % len;
             continue;
         }
-        switch (nd.type) {
-            case DONE:
-                if (!working_queues[i]) {
-                    n_working_queues --;
-                    working_queues[i] = true;
-                }
-                break;
-            default:
-                (*coeq[nd.type]).produce(nd);
-                break;
+        if (nd.type == DONE) {
+            if (!working_queues[idx]) {
+                working_queues[idx] = true;
+                --num_working_queues;
+            }
+        } else {
+            coeq[nd.type]->produce(nd);
         }
-        i = (i + 1) % len;
+        idx = (idx + 1) % len;
     }
-    (*coeq[SPORTS]).produce({DONE, "DONE"});
-    (*coeq[NEWS]).produce({DONE, "DONE"});
-    (*coeq[WEATHER]).produce({DONE, "DONE"});
+    for (BoundedBuffer* cb : coeq) {//notify co-editors of DONE
+        cb->produce({DONE, "DONE"});
+    }
 }
+
 Dispatcher::~Dispatcher() {
-    // I decided that the dispatcher is in charge of free the allocated memory.
-    // this is because the dispatcher has access to most bounded buffer need to be free
+    // dispatcher owns and frees the allocated queues
     for (BoundedBuffer *bb : pq) {
         delete bb;
     }

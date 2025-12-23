@@ -1,74 +1,82 @@
 #include "BoundedBuffer.h"
 
-BoundedBuffer::BoundedBuffer(int size, bool dont_block) {
-    // string *buffer - the buffer
-    // int size - the size of the buffer
-    // bool dont_block - if true, then the consume function does not block.
-    this->size = size;
-    buffer = new news_data[size];
-    this->buffer = buffer;
-    in = 0;
-    out = 0;
+BoundedBuffer::BoundedBuffer(int capacity, bool nonBlocking) {
+    // initialize indices and storage
+    write_pos = 0;
+    read_pos = 0;
+    this->size = capacity;
+    buffer = new news_data[capacity];
+
     init_semaphore();
-    if (dont_block) {
-        flags = IPC_NOWAIT;
-    } else {
-        flags = 0;
-    }
+    flags = nonBlocking ? IPC_NOWAIT : 0;
 }
-// buffer write
+
 int BoundedBuffer::produce(news_data src) {
-    struct sembuf sops[1];
-    sops[0].sem_num = EMPTY;
-    sops[0].sem_flg = 0;
-    sops[0].sem_op = -1; // produce one - one less empty
-    semop(semid, sops, 1);
+    struct sembuf ops[1];
+
+    // wait for an empty slot
+    ops[0].sem_num = EMPTY;
+    ops[0].sem_flg = 0;
+    ops[0].sem_op  = -1;
+    if (semop(semid, ops, 1) == -1) {
+        return -1;
+    }
+
     pthread_mutex_lock(&lock);
-    buffer[in] = src;
-    in = (in + 1) % size;
+    buffer[write_pos] = src;
+    write_pos = (write_pos + 1) % size;
     pthread_mutex_unlock(&lock);
-    sops[0].sem_num = FULL;
-    sops[0].sem_flg = 0;
-    sops[0].sem_op = 1; // produce one - one more filled
-    semop(semid, sops, 1);
+
+    // signal one more full slot
+    ops[0].sem_num = FULL;
+    ops[0].sem_flg = 0;
+    ops[0].sem_op  = 1;
+    semop(semid, ops, 1);
+
     return 0;
 }
-void BoundedBuffer::print_all() {
+
+void BoundedBuffer::print() {
     union semun arg;
-    unsigned short values[2] = {0, 0};
-    arg.array = values;
+    unsigned short vals[2] = {0, 0};
+    arg.array = vals;
     semctl(semid, 0, GETALL, arg);
     printf("%p buffer - sem values: %d %d\n", this, arg.array[0], arg.array[1]);
 }
-// buffer read
+
 int BoundedBuffer::consume(news_data *dst) {
-    struct sembuf sops[1];
-    sops[0].sem_num = FULL;
-    sops[0].sem_flg = flags;
-    sops[0].sem_op = -1; // consume one, one less filled
-    if (semop(semid, sops, 1) == -1) {
-        // buffer is empty
+    struct sembuf ops[1];
+
+    // wait for a filled slot (respect flags for non-blocking)
+    ops[0].sem_num = FULL;
+    ops[0].sem_flg = flags;
+    ops[0].sem_op  = -1;
+    if (semop(semid, ops, 1) == -1) {
         return -1;
     }
+
     pthread_mutex_lock(&lock);
-    *dst = buffer[out];
-    out = (out + 1) % size;
+    *dst = buffer[read_pos];
+    read_pos = (read_pos + 1) % size;
     pthread_mutex_unlock(&lock);
-    sops[0].sem_num = EMPTY;
-    sops[0].sem_flg = flags;
-    sops[0].sem_op = 1; // consume one, one more empty
-    semop(semid, sops, 1);
+
+    // signal one more empty slot
+    ops[0].sem_num = EMPTY;
+    ops[0].sem_flg = flags;
+    ops[0].sem_op  = 1;
+    semop(semid, ops, 1);
+
     return 0;
 }
 
 BoundedBuffer::~BoundedBuffer() {
-    // delete the mutex and the semaphore
     pthread_mutex_destroy(&lock);
     if (semctl(semid, 0, IPC_RMID, NULL) == -1) {
         printf("semaphore delete error\n");
     }
     delete[] buffer;
 }
+
 void BoundedBuffer::init_semaphore() {
     if (pthread_mutex_init(&lock, nullptr) != 0) {
         printf("Unable to create a mutex\n");
@@ -78,8 +86,8 @@ void BoundedBuffer::init_semaphore() {
         printf("Unable to create a semaphore\n");
         exit(-1);
     }
-    union semun semarg;
 
+    union semun semarg;
     semarg.val = size;
     semctl(semid, EMPTY, SETVAL, semarg);
     semarg.val = 0;

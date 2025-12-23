@@ -23,18 +23,18 @@ vector<int*> parse_config(char *name) {
         if (a==0 || b==0 or c==0) {
             break;
         }
-        int *x = new int[3]; // needs to be deleted
-        x[0] = id;
-        x[1] = n;
-        x[2] = size;
-        ret.push_back(x);
+        int *to_be_freed = new int[3]; 
+        to_be_freed[0] = id;
+        to_be_freed[1] = n;
+        to_be_freed[2] = size;
+        ret.push_back(to_be_freed);
     }
     fscanf(file, "Co-Editor queue size = %d", &size);
-    int *x = new int[3]; // needs to be deleted
-    x[0] = -1;
-    x[1] = -1;
-    x[2] = size;
-    ret.push_back(x);
+    int *to_be_freed = new int[3];
+    to_be_freed[0] = -1;
+    to_be_freed[1] = -1;
+    to_be_freed[2] = size;
+    ret.push_back(to_be_freed);
     fclose(file);
     return ret;
 }
@@ -52,8 +52,7 @@ vector<Producer*> init_producers(vector<int*> vec, vector<BoundedBuffer*> *pq) {
     return ret;
 }
 vector<Co_Editor*> init_co_editors(int queue_size, BoundedBuffer *smbb, vector<BoundedBuffer*> *cobb) {
-    // dynamic array of pointers to co editors
-    vector<Co_Editor*> ret;
+    vector<Co_Editor*> ret;     // array of pointers to co editors
     for (int i = 0; i < NEWS_TYPES - 1; i++) {
         BoundedBuffer *bb = new BoundedBuffer(queue_size);
         (*cobb).push_back(bb);
@@ -77,8 +76,8 @@ void *handle_co_editor(void *arg) {
     ce->edit();
     return nullptr;
 }
-void *handle_screen_manager(void *arg) {
-    Screen_Manager *sm = (Screen_Manager *)arg;
+void *handle_scrmanager(void *arg) {
+    ScrManager *sm = (ScrManager *)arg;
     sm->display();
     return nullptr;
 }
@@ -95,9 +94,9 @@ int main(int argc, char *argv[]) {
     vector<BoundedBuffer*> pq;
     vector<BoundedBuffer*> co;
     vector<Producer*> producers = init_producers(vec, &pq);
-    BoundedBuffer smbb(SCREEN_MANAGER_QUEUE_SIZE);
+    BoundedBuffer smbb(100); // screen manager queue size =
     vector<Co_Editor*> co_editors = init_co_editors(co_editor_size, &smbb, &co);
-    Screen_Manager sm(smbb);
+    ScrManager sm(smbb);
     Dispatcher d(pq, co);
     for (int *integ : vec) {
         delete integ;
@@ -114,7 +113,7 @@ int main(int argc, char *argv[]) {
         pthread_create(&pt, nullptr, handle_co_editor, (void *)coed);
         threads.push_back(pt);
     }
-    pthread_create(&pt, nullptr, handle_screen_manager, (void *)&sm);
+    pthread_create(&pt, nullptr, handle_scrmanager, (void *)&sm);
     threads.push_back(pt);
     // wait before cleaning
     void *ignore;
